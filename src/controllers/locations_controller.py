@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 
 from src.config.database import get_db
-from src.config.dependencies import get_current_user, require_admin
+from src.config.dependencies import require_admin
 from src.services.location_service import LocationService
 from src.models.location import LocationCategory
 from src.models.user import User

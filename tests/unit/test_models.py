@@ -1,9 +1,6 @@
-import pytest
-from datetime import datetime
-
 from src.models.user import User, UserRole
 from src.models.booking import Booking, BookingStatus
-from src.models.slot import Slot, SlotStatus
+from src.models.slot import SlotStatus
 from src.models.location import Location, LocationCategory, LocationImage
 
 

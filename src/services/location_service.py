@@ -1,6 +1,6 @@
 import os
 import uuid
-from fastapi import HTTPException, UploadFile, status
+from fastapi import HTTPException, UploadFile
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
@@ -14,7 +14,7 @@ class LocationService:
     def __init__(self, db: Session):
         self.repo = LocationRepository(db)
 
-    def get_all(self, category: Optional[LocationCategory] = None, active_only: bool = True) -> List[LocationResponseDTO]:
+    def get_all(self, category: Optional[LocationCategory] = None, active_only: bool = True) -> List[LocationResponseDTO]:  # noqa: E501
         locations = self.repo.get_all(category=category, active_only=active_only)
         return [LocationResponseDTO.from_orm(loc) for loc in locations]
 

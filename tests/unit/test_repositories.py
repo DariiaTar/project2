@@ -1,11 +1,10 @@
-import pytest
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock
 from datetime import datetime, timedelta
 
 from src.repositories.user_repository import UserRepository
 from src.repositories.location_repository import LocationRepository
 from src.repositories.booking_repository import BookingRepository, SlotRepository
-from src.models.user import User, UserRole
+from src.models.user import User
 from src.models.location import Location, LocationCategory, LocationImage
 from src.models.booking import Booking, BookingStatus
 from src.models.slot import Slot, SlotStatus
@@ -28,7 +27,7 @@ class TestUserRepository:
         db, q = make_db()
         q.first.return_value = None
         repo = UserRepository(db)
-        result = repo.get_by_id(1)
+        repo.get_by_id(1)
         db.query.assert_called_once_with(User)
 
     def test_get_by_id_returns_user(self):

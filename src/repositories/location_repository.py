@@ -15,7 +15,7 @@ class LocationRepository:
                 active_only: bool = True) -> List[Location]:
         query = self.db.query(Location)
         if active_only:
-            query = query.filter(Location.is_active == True)
+            query = query.filter(Location.is_active.is_(True))
         if category:
             query = query.filter(Location.category == category)
         return query.offset(skip).limit(limit).all()

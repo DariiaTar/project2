@@ -106,14 +106,14 @@ jobs:
           restore-keys: pip-${{ runner.os }}-
 
       - name: Install dependencies
-        run: pip install -r requirements.txt pytest-cov
+        run: pip install -r requirements.txt pytest-cov pytest-asyncio
 
       - name: Run integration tests
         run: |
           pytest tests/integration/ -v --tb=short \
             --junitxml=junit-integration.xml
         env:
-          DATABASE_URL: postgresql://sportbook:sportbook@localhost:5432/sportbook_test
+          DATABASE_URL: sqlite:///./test.db
           SECRET_KEY: test-secret-key
 
       - name: Upload integration test report
@@ -203,6 +203,7 @@ jobs:
         run: npm run build
         env:
           REACT_APP_API_URL: http://localhost:8000/api
+          CI: false
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4

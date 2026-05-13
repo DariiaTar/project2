@@ -1,5 +1,4 @@
 """Tests for In-Memory repository implementations."""
-import pytest
 from datetime import datetime, timedelta
 
 from src.repositories.in_memory import (

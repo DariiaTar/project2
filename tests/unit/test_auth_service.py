@@ -1,7 +1,7 @@
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from fastapi import HTTPException
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from src.services.auth_service import AuthService
 from src.models.user import User, UserRole

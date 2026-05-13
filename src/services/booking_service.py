@@ -5,9 +5,12 @@ from typing import List, Optional
 from src.repositories.slot_repository import SlotRepository
 from src.repositories.booking_repository import BookingRepository
 from src.repositories.location_repository import LocationRepository
-from src.models.slot import SlotStatus, Slot
+from src.models.slot import SlotStatus
 from src.models.booking import BookingStatus
-from src.dto.booking_dto import BookingCreateDTO, BookingResponseDTO, SlotCreateDTO, SlotResponseDTO, BookingAdminResponseDTO, BookingDetailsResponseDTO
+from src.dto.booking_dto import (
+    BookingCreateDTO, BookingResponseDTO, SlotCreateDTO, SlotResponseDTO,
+    BookingAdminResponseDTO, BookingDetailsResponseDTO,
+)
 from src.services.pricing_strategy import IPricingStrategy, DynamicPricingContext
 from src.services.booking_observer import IBookingObserver, BookingNotifier
 

@@ -1,6 +1,4 @@
 """Tests for GoF Observer pattern — booking notifications."""
-import pytest
-
 from src.services.booking_observer import (
     IBookingObserver,
     LoggingObserver,

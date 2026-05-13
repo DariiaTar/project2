@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from typing import Optional
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from fastapi import HTTPException, status
@@ -7,7 +6,6 @@ from sqlalchemy.orm import Session
 
 from src.config.settings import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 from src.repositories.user_repository import UserRepository
-from src.models.user import User, UserRole
 from src.dto.user_dto import UserRegisterDTO, UserLoginDTO, TokenDTO, UserResponseDTO
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
