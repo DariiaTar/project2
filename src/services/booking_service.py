@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 
 from src.repositories.slot_repository import SlotRepository
 from src.repositories.booking_repository import BookingRepository
@@ -8,6 +8,8 @@ from src.repositories.location_repository import LocationRepository
 from src.models.slot import SlotStatus, Slot
 from src.models.booking import BookingStatus
 from src.dto.booking_dto import BookingCreateDTO, BookingResponseDTO, SlotCreateDTO, SlotResponseDTO, BookingAdminResponseDTO, BookingDetailsResponseDTO
+from src.services.pricing_strategy import IPricingStrategy, DynamicPricingContext
+from src.services.booking_observer import IBookingObserver, BookingNotifier
 
 
 class SlotService:
@@ -40,10 +42,28 @@ class SlotService:
 
 
 class BookingService:
-    def __init__(self, db: Session):
+    def __init__(
+        self,
+        db: Session,
+        pricing_strategy: Optional[IPricingStrategy] = None,
+        observers: Optional[List[IBookingObserver]] = None,
+    ):
         self.booking_repo = BookingRepository(db)
         self.slot_repo = SlotRepository(db)
         self.location_repo = LocationRepository(db)
+        self._pricing_context = DynamicPricingContext(pricing_strategy)
+        self._notifier = BookingNotifier()
+        for obs in (observers or []):
+            self._notifier.subscribe(obs)
+
+    def set_pricing_strategy(self, strategy: IPricingStrategy) -> None:
+        self._pricing_context.set_strategy(strategy)
+
+    def add_observer(self, observer: IBookingObserver) -> None:
+        self._notifier.subscribe(observer)
+
+    def remove_observer(self, observer: IBookingObserver) -> None:
+        self._notifier.unsubscribe(observer)
 
     def create_booking(self, user_id: int, data: BookingCreateDTO) -> BookingResponseDTO:
         slot = self.slot_repo.get_by_id(data.slot_id)
@@ -53,8 +73,9 @@ class BookingService:
             raise HTTPException(status_code=400, detail="Слот вже заброньований")
 
         location = self.location_repo.get_by_id(slot.location_id)
-        duration_hours = (slot.end_time - slot.start_time).seconds / 3600
-        total_price = location.price_per_hour * duration_hours
+        total_price = self._pricing_context.calculate_price(
+            location.price_per_hour, slot.start_time, slot.end_time
+        )
 
         booking = self.booking_repo.create(
             user_id=user_id,
@@ -66,6 +87,7 @@ class BookingService:
             guest_phone=data.guest_phone,
         )
         self.slot_repo.update_status(slot, SlotStatus.BOOKED)
+        self._notifier.notify_booking_created(booking.id, user_id, data.slot_id, total_price)
         return BookingResponseDTO.from_orm(booking)
 
     def get_user_bookings(self, user_id: int) -> List[BookingResponseDTO]:
@@ -138,6 +160,7 @@ class BookingService:
             raise HTTPException(status_code=400, detail="Бронювання не потребує оплати")
 
         updated = self.booking_repo.update_status(booking, BookingStatus.CONFIRMED)
+        self._notifier.notify_booking_confirmed(booking_id, updated.user_id)
         location = self.location_repo.get_by_id(updated.slot.location_id)
         return BookingDetailsResponseDTO(
             id=updated.id,
@@ -170,6 +193,7 @@ class BookingService:
 
         updated = self.booking_repo.update_status(booking, BookingStatus.CANCELLED)
         self.slot_repo.update_status(booking.slot, SlotStatus.AVAILABLE)
+        self._notifier.notify_booking_cancelled(booking_id, user_id)
         return BookingResponseDTO.from_orm(updated)
 
     def update_status(self, booking_id: int, status: BookingStatus) -> BookingResponseDTO:

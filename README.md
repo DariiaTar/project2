@@ -1,5 +1,11 @@
 # SportBook UA — Система бронювання спортивних локацій
 
+[![CI/CD](https://github.com/DariiaTar/refactoring_project2/actions/workflows/ci.yml/badge.svg)](https://github.com/DariiaTar/refactoring_project2/actions/workflows/ci.yml)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=dariiatar_refactoring_project2&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=dariiatar_refactoring_project2)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=dariiatar_refactoring_project2&metric=coverage)](https://sonarcloud.io/summary/new_code?id=dariiatar_refactoring_project2)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=dariiatar_refactoring_project2&metric=bugs)](https://sonarcloud.io/summary/new_code?id=dariiatar_refactoring_project2)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=dariiatar_refactoring_project2&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=dariiatar_refactoring_project2)
+
 Повнофункціональна система для бронювання спортивних локацій: тенісні корти, футбольні поля, басейни, тренажерні зали.
 
 **Backend:** Python 3.11, FastAPI, SQLAlchemy, PostgreSQL, JWT  
@@ -113,7 +119,7 @@ npm start
 # Всі тести
 pytest
 
-# Тільки юніт-тести (67 тестів)
+# Тільки юніт-тести (344 тести)
 pytest tests/unit/ -v
 
 # Тільки інтеграційні (3 сценарії)
@@ -291,7 +297,9 @@ docker compose down -v
 
 | Патерн | Реалізація |
 |--------|-----------|
-| **Repository** (GoF) | `BookingRepository`, `UserRepository` — ізоляція SQL від бізнес-логіки |
+| **Strategy** (GoF) | `IPricingStrategy` → `StandardPricingStrategy`, `PeakHourPricingStrategy`, `WeekendPricingStrategy` — розрахунок ціни бронювання |
+| **Observer** (GoF) | `IBookingObserver` → `LoggingObserver`, `EmailNotificationObserver`; `BookingNotifier` повідомляє підписників про події бронювання |
+| **Repository** (GoF) | `IBookingRepository`, `IUserRepository` тощо — ізоляція SQL від бізнес-логіки; `InMemory*` реалізації для тестів |
 | **Singleton** (GoF) | `AppSettings.get_instance()` у `src/config/settings.py` |
 | **DTO** | Pydantic-схеми між шарами: `BookingCreateDTO`, `BookingDetailsResponseDTO` |
 | **Dependency Injection** | FastAPI `Depends(get_db)`, `Depends(get_current_user)` |

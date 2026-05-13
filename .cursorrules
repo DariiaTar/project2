@@ -1,0 +1,47 @@
+# SportBook UA — Global AI Rules
+
+## Mandatory Constraints
+
+1. **Never generate code without interfaces.**
+   All repository classes MUST implement an abstract base class from `src/repositories/interfaces.py`.
+   All service strategies MUST implement a corresponding ABC (`IPricingStrategy`, `IBookingObserver`).
+
+2. **Test-Driven Development (TDD) is required.**
+   Write the test first, then write the implementation to make it pass.
+   Every new public method must have at least one unit test covering the happy path and one covering an error/edge case.
+
+3. **No external databases or APIs.**
+   The project uses SQLAlchemy with SQLite for tests and PostgreSQL for production.
+   All unit tests MUST use mocks (MagicMock) or In-Memory repositories — never a real database connection.
+   Never import `requests`, `httpx` (except for TestClient), or any third-party API clients.
+
+4. **No raw SQL.**
+   All database access goes through the Repository layer. Services must never import SQLAlchemy directly.
+
+5. **SOLID principles are non-negotiable.**
+   - Single Responsibility: each class has one reason to change.
+   - Open/Closed: extend via strategy/observer injection, not by modifying existing classes.
+   - Liskov Substitution: in-memory repos are drop-in replacements for SQL repos.
+   - Interface Segregation: keep ABCs small and focused.
+   - Dependency Inversion: services depend on interfaces, not concrete implementations.
+
+6. **GoF Patterns in use — do not bypass them.**
+   - Strategy: use `DynamicPricingContext.set_strategy()` to change pricing logic.
+   - Observer: use `BookingService.add_observer()` to hook into booking lifecycle events.
+   - Repository: all data access through `IUserRepository`, `ILocationRepository`, etc.
+   - Singleton: use `AppSettings.get_instance()` — never instantiate `AppSettings` directly.
+
+7. **Architecture layers must not be crossed.**
+   Controllers → Services → Repositories → Models.
+   A controller must NEVER import from `repositories` directly.
+   A repository must NEVER import from `services`.
+
+8. **Language for user-facing strings: Ukrainian.**
+   All `HTTPException` detail messages and validation errors must be in Ukrainian.
+
+9. **No hardcoded secrets.**
+   Use `src/config/settings.py` for all configuration. Never hardcode `SECRET_KEY`, `DATABASE_URL`, etc.
+
+10. **Coverage target: ≥ 70%.**
+    When adding a new service method, add corresponding tests to `tests/unit/`.
+    Run `pytest tests/unit/ --cov=src --cov-report=term-missing` to verify before committing.
