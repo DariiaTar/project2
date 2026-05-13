@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+
+# Tests & coverage
+.pytest_cache/
+htmlcov/
+coverage.xml
+junit.xml
+junit-integration.xml
+.coverage
+
+# Environment
+.env
+*.env
+
+# Database
+*.db
+*.sqlite3
+
+# Uploads
+uploads/
+
+# macOS
+.DS_Store
+
+# Node
+frontend/node_modules/
+frontend/build/
+
+# IDE
+.idea/
+.vscode/
