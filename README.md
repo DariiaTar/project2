@@ -1,10 +1,10 @@
 # SportBook UA — Система бронювання спортивних локацій
 
-[![CI/CD](https://github.com/DariiaTar/refactoring_project2/actions/workflows/ci.yml/badge.svg)](https://github.com/DariiaTar/refactoring_project2/actions/workflows/ci.yml)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=dariiatar_refactoring_project2&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=dariiatar_refactoring_project2)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=dariiatar_refactoring_project2&metric=coverage)](https://sonarcloud.io/summary/new_code?id=dariiatar_refactoring_project2)
-[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=dariiatar_refactoring_project2&metric=bugs)](https://sonarcloud.io/summary/new_code?id=dariiatar_refactoring_project2)
-[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=dariiatar_refactoring_project2&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=dariiatar_refactoring_project2)
+[![CI/CD](https://github.com/DariiaTar/project2/actions/workflows/ci.yml/badge.svg)](https://github.com/DariiaTar/project2/actions/workflows/ci.yml)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=DariiaTar_project2&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=DariiaTar_project2)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=DariiaTar_project2&metric=coverage)](https://sonarcloud.io/summary/new_code?id=DariiaTar_project2)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=DariiaTar_project2&metric=bugs)](https://sonarcloud.io/summary/new_code?id=DariiaTar_project2)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=DariiaTar_project2&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=DariiaTar_project2)
 
 Повнофункціональна система для бронювання спортивних локацій: тенісні корти, футбольні поля, басейни, тренажерні зали.
 
@@ -24,7 +24,7 @@
 | Code Smells | **A** |
 | Duplications | **< 3%** |
 
-Повний звіт: [SonarCloud Dashboard](https://sonarcloud.io/summary/new_code?id=dariiatar_refactoring_project2)
+Повний звіт: [SonarCloud Dashboard](https://sonarcloud.io/summary/new_code?id=DariiaTar_project2)
 
 ---
 
