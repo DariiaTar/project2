@@ -51,6 +51,19 @@ Layered (шарова) архітектура зі строгим напрямк
 - **I** — ABC інтерфейси дрібні й сфокусовані
 - **D** — сервіси залежать від `IRepository`, не від конкретних класів
 
+## Діаграми
+
+### Use Case Diagram
+![Use Case Diagram](docs/diagrams/use_case.png)
+
+### Domain Model
+![Domain Model](docs/diagrams/domain_model.png)
+
+### Class Diagram
+![Class Diagram](docs/diagrams/class_diagram.png)
+
+---
+
 ## Ролі користувачів
 
 | Роль | Права |
