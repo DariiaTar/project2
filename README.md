@@ -8,9 +8,29 @@
 
 Повнофункціональна система для бронювання спортивних локацій: тенісні корти, футбольні поля, басейни, тренажерні зали.
 
+Проєкт демонструє застосування **GoF патернів** (Strategy, Observer, Repository, Singleton), **SOLID принципів** та **шарової архітектури** у реальному FastAPI застосунку з повним CI/CD пайплайном і покриттям тестами ≥ 70%.
+
 **Backend:** Python 3.11, FastAPI, SQLAlchemy, PostgreSQL, JWT  
 **Frontend:** React 18, React Router, Axios  
 **DevOps:** Docker, Docker Compose, GitHub Actions CI/CD
+
+---
+
+## Зміст
+
+- [Якість коду](#якість-коду-sonarcloud)
+- [Архітектура](#архітектура)
+- [Design Patterns](#design-patterns)
+- [Ролі користувачів](#ролі-користувачів)
+- [Швидкий старт](#швидкий-старт)
+- [Змінні середовища](#змінні-середовища-та-секрети)
+- [Запуск тестів](#запуск-тестів)
+- [API Endpoints](#api-endpoints)
+- [CI/CD Pipeline](#cicd-pipeline)
+- [Docker](#багатоконтейнерна-система-multi-container)
+- [Бізнес-логіка](#бізнес-логіка-та-алгоритми)
+- [Структура репозиторію](#структура-репозиторію)
+- [AI конфігурація](#ai-конфігурація)
 
 ---
 
@@ -425,12 +445,19 @@ sport-booking/
 │   │   ├── domain_model.md
 │   │   └── class_diagram.md
 │   └── spec/api_spec.md     REST API специфікація
-├── .cursor/rules/           AI контекст для Cursor/Claude
-│   ├── architecture.md
-│   └── testing_strategy.md
+├── .cursor/rules/           Контекстні правила для Cursor
+│   ├── architecture.md      Опис шарів, патернів, DI
+│   └── testing_strategy.md  Команди pytest, мок-патерни, coverage
+├── .claude/
+│   └── commands/            Slash-команди для Claude Code
+│       ├── create-unit-tests.md
+│       ├── add-service.md
+│       ├── add-repository.md
+│       └── add-pricing-strategy.md
+├── .cursorrules             Глобальні AI правила (SOLID, заборони, шари)
+├── CLAUDE.md                AI правила для Claude Code
 ├── .github/workflows/
 │   └── ci.yml               GitHub Actions: test → lint → sonar → docker
-├── .cursorrules             Глобальні правила для AI-агентів
 ├── sonar-project.properties SonarCloud конфігурація
 ├── .coveragerc              Coverage.py налаштування (relative_files)
 ├── Dockerfile               Backend image
@@ -438,3 +465,20 @@ sport-booking/
 ├── .env.example             Шаблон змінних середовища
 └── requirements.txt         Python залежності
 ```
+
+---
+
+## AI конфігурація
+
+Проєкт налаштований для роботи з AI-асистентами:
+
+| Файл | Інструмент | Призначення |
+|------|-----------|-------------|
+| `CLAUDE.md` | Claude Code | Правила архітектури, автозавантажуються в кожну сесію |
+| `.cursorrules` | Cursor | Глобальні обмеження — SOLID, заборони, шари |
+| `.cursor/rules/architecture.md` | Cursor | Контекст архітектури при роботі з `src/` |
+| `.cursor/rules/testing_strategy.md` | Cursor | Конвенції тестів при роботі з `tests/` |
+| `.claude/commands/create-unit-tests.md` | Claude Code | `/create-unit-tests <ClassName>` |
+| `.claude/commands/add-service.md` | Claude Code | `/add-service <ServiceName>` |
+| `.claude/commands/add-repository.md` | Claude Code | `/add-repository <EntityName>` |
+| `.claude/commands/add-pricing-strategy.md` | Claude Code | `/add-pricing-strategy <StrategyName>` |
