@@ -49,6 +49,7 @@ export const slotsApi = {
   getByLocation: (locationId) => api.get(`/slots/location/${Number.parseInt(locationId, 10)}`),
   getAvailable: (locationId) => api.get(`/slots/location/${Number.parseInt(locationId, 10)}/available`),
   create: (data) => api.post('/slots/', data),
+  updateStatus: (id, status) => api.put(`/slots/${Number.parseInt(id, 10)}/status`, { status }),
   delete: (id) => api.delete(`/slots/${Number.parseInt(id, 10)}`),
 };
 

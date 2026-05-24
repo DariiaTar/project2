@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from src.config.database import get_db
 from src.config.dependencies import require_admin
 from src.services.booking_service import SlotService
-from src.dto.booking_dto import SlotCreateDTO, SlotResponseDTO
+from src.dto.booking_dto import SlotCreateDTO, SlotResponseDTO, SlotStatusUpdateDTO
 from src.models.user import User
 
 router = APIRouter()
@@ -27,6 +27,11 @@ def get_available_slots(location_id: int, db: DbDep):
 @router.post("/", response_model=SlotResponseDTO, summary="Створити слот (адмін)")
 def create_slot(data: SlotCreateDTO, db: DbDep, _: AdminDep):
     return SlotService(db).create(data)
+
+
+@router.put("/{slot_id}/status", response_model=SlotResponseDTO, summary="Змінити статус слоту (адмін)")
+def update_slot_status(slot_id: int, data: SlotStatusUpdateDTO, db: DbDep, _: AdminDep):
+    return SlotService(db).update_status(slot_id, data.status)
 
 
 @router.delete("/{slot_id}", summary="Видалити слот (адмін)")

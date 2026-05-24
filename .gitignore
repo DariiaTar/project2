@@ -12,9 +12,8 @@ build/
 # Tests & coverage
 .pytest_cache/
 htmlcov/
-coverage.xml
-junit.xml
-junit-integration.xml
+coverage*.xml
+junit*.xml
 .coverage
 
 # Environment

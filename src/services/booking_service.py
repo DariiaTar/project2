@@ -48,6 +48,15 @@ class SlotService:
             raise HTTPException(status_code=400, detail="Не можна видалити заброньований слот")
         self.slot_repo.delete(slot)
 
+    def update_status(self, slot_id: int, status: SlotStatus) -> SlotResponseDTO:
+        slot = self.slot_repo.get_by_id(slot_id)
+        if not slot:
+            raise HTTPException(status_code=404, detail=_ERR_SLOT_NOT_FOUND)
+        if slot.status == SlotStatus.BOOKED:
+            raise HTTPException(status_code=400, detail="Не можна змінити статус заброньованого слоту")
+        updated = self.slot_repo.update_status(slot, status)
+        return SlotResponseDTO.from_orm(updated)
+
 
 class BookingService:
     def __init__(

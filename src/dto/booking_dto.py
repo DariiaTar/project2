@@ -55,6 +55,10 @@ class BookingStatusUpdateDTO(BaseModel):
     status: BookingStatus
 
 
+class SlotStatusUpdateDTO(BaseModel):
+    status: SlotStatus
+
+
 class BookingAdminResponseDTO(BaseModel):
     id: int
     slot_id: int

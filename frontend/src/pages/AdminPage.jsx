@@ -46,7 +46,7 @@ export default function AdminPage() {
       </div>
 
       {tab === 0 && <LocationsTab locations={locations} setLocations={setLocations} />}
-      {tab === 1 && <SlotsTab locations={locations} slots={slots} loadSlots={loadSlotsForLocation} setSlots={setSlots} />}
+      {tab === 1 && <SlotsTab locations={locations} slots={slots} loadSlots={loadSlotsForLocation} />}
       {tab === 2 && <BookingsTab bookings={bookings} setBookings={setBookings} />}
       {tab === 3 && <UsersTab users={users} setUsers={setUsers} />}
     </div>
@@ -196,17 +196,36 @@ LocationsTab.propTypes = {
 };
 
 // ---- SLOTS TAB ----
-function SlotsTab({ locations, slots, loadSlots, setSlots }) {
+const SLOT_STATUS_LABELS = { available: 'Доступний', booked: 'Заброньований', blocked: 'Заблокований' };
+const SLOT_STATUS_COLORS = { available: '#4CAF50', booked: '#f44336', blocked: '#888' };
+
+function SlotsTab({ locations, slots, loadSlots }) {
   const [selectedLoc, setSelectedLoc] = useState('');
   const [form, setForm] = useState({ start_time: '', end_time: '' });
+
+  const toISOWithSeconds = (val) => val && val.length === 16 ? `${val}:00` : val;
 
   const handleCreate = async (e) => {
     e.preventDefault();
     try {
-      await slotsApi.create({ location_id: Number.parseInt(selectedLoc, 10), start_time: form.start_time, end_time: form.end_time });
+      await slotsApi.create({
+        location_id: Number.parseInt(selectedLoc, 10),
+        start_time: toISOWithSeconds(form.start_time),
+        end_time: toISOWithSeconds(form.end_time),
+      });
       toast.success('Слот створено');
+      setForm({ start_time: '', end_time: '' });
       loadSlots(selectedLoc);
     } catch (createError) { toast.error(createError.response?.data?.detail || 'Помилка'); }
+  };
+
+  const handleToggleBlock = async (slot) => {
+    const newStatus = slot.status === 'blocked' ? 'available' : 'blocked';
+    try {
+      await slotsApi.updateStatus(slot.id, newStatus);
+      toast.success(newStatus === 'blocked' ? 'Слот заблоковано' : 'Слот розблоковано');
+      loadSlots(selectedLoc);
+    } catch (err) { toast.error(err.response?.data?.detail || 'Помилка'); }
   };
 
   const handleDelete = async (id) => {
@@ -217,12 +236,10 @@ function SlotsTab({ locations, slots, loadSlots, setSlots }) {
     } catch (deleteError) { toast.error(deleteError.response?.data?.detail || 'Не можна видалити заброньований слот'); }
   };
 
-  const STATUS_COLORS = { available: '#4CAF50', booked: '#f44336', blocked: '#888' };
-
   return (
     <div>
       <div style={{ background: '#fff', borderRadius: '16px', padding: '20px', marginBottom: '20px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
-        <h3 style={{ margin: '0 0 16px', fontWeight: 700 }}>Нові слоти</h3>
+        <h3 style={{ margin: '0 0 16px', fontWeight: 700 }}>Новий слот</h3>
         <form onSubmit={handleCreate} style={{ display: 'flex', gap: '12px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
           <div>
             <label htmlFor="slot-location" style={labelStyle}>Локація</label>
@@ -253,11 +270,16 @@ function SlotsTab({ locations, slots, loadSlots, setSlots }) {
               </span>
             </div>
             <span style={{
-              background: STATUS_COLORS[slot.status] + '20', color: STATUS_COLORS[slot.status],
+              background: SLOT_STATUS_COLORS[slot.status] + '20', color: SLOT_STATUS_COLORS[slot.status],
               padding: '3px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 700, marginRight: '12px',
-            }}>{slot.status}</span>
+            }}>{SLOT_STATUS_LABELS[slot.status] || slot.status}</span>
             {slot.status !== 'booked' && (
-              <button onClick={() => handleDelete(slot.id)} style={{ ...btnGray, color: '#f44336' }}>🗑️</button>
+              <div style={{ display: 'flex', gap: '6px' }}>
+                <button onClick={() => handleToggleBlock(slot)} style={{ ...btnGray, color: slot.status === 'blocked' ? '#4CAF50' : '#FF9800' }}>
+                  {slot.status === 'blocked' ? '🔓 Розблок.' : '🔒 Блок.'}
+                </button>
+                <button onClick={() => handleDelete(slot.id)} style={{ ...btnGray, color: '#f44336' }}>🗑️</button>
+              </div>
             )}
           </div>
         ))}
@@ -271,7 +293,6 @@ SlotsTab.propTypes = {
   locations: PropTypes.array.isRequired,
   slots: PropTypes.array.isRequired,
   loadSlots: PropTypes.func.isRequired,
-  setSlots: PropTypes.func.isRequired,
 };
 
 // ---- BOOKINGS TAB ----

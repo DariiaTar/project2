@@ -68,6 +68,23 @@ jobs:
           path: junit.xml
           retention-days: 7
 
+      - name: Package all reports as zip
+        if: always()
+        run: |
+          mkdir -p reports
+          cp coverage.xml reports/
+          cp junit.xml reports/
+          cp -r htmlcov reports/
+          zip -r reports.zip reports/
+
+      - name: Upload reports zip
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: all-reports
+          path: reports.zip
+          retention-days: 7
+
   # ── 2. Backend integration tests ───────────────────────────────────────────
   test-backend-integration:
     name: Integration Tests (Backend)
