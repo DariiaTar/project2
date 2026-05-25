@@ -314,6 +314,36 @@ class TestSlotService:
         result = slot_service.get_available(1)
         assert result == []
 
+    def test_update_status_blocks_available_slot(self, slot_service):
+        slot = make_slot(status=SlotStatus.AVAILABLE)
+        updated = make_slot(status=SlotStatus.BLOCKED)
+        slot_service.slot_repo.get_by_id = MagicMock(return_value=slot)
+        slot_service.slot_repo.update_status = MagicMock(return_value=updated)
+        result = slot_service.update_status(1, SlotStatus.BLOCKED)
+        assert result.status == SlotStatus.BLOCKED
+        slot_service.slot_repo.update_status.assert_called_once_with(slot, SlotStatus.BLOCKED)
+
+    def test_update_status_unblocks_slot(self, slot_service):
+        slot = make_slot(status=SlotStatus.BLOCKED)
+        unblocked = make_slot(status=SlotStatus.AVAILABLE)
+        slot_service.slot_repo.get_by_id = MagicMock(return_value=slot)
+        slot_service.slot_repo.update_status = MagicMock(return_value=unblocked)
+        result = slot_service.update_status(1, SlotStatus.AVAILABLE)
+        assert result.status == SlotStatus.AVAILABLE
+
+    def test_update_status_not_found_raises(self, slot_service):
+        slot_service.slot_repo.get_by_id = MagicMock(return_value=None)
+        with pytest.raises(HTTPException) as exc:
+            slot_service.update_status(999, SlotStatus.BLOCKED)
+        assert exc.value.status_code == 404
+
+    def test_update_status_booked_slot_raises(self, slot_service):
+        slot = make_slot(status=SlotStatus.BOOKED)
+        slot_service.slot_repo.get_by_id = MagicMock(return_value=slot)
+        with pytest.raises(HTTPException) as exc:
+            slot_service.update_status(1, SlotStatus.AVAILABLE)
+        assert exc.value.status_code == 400
+
 
 class TestPayBooking:
     def test_pay_pending_booking_succeeds(self, booking_service):
