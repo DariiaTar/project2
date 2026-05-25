@@ -27,18 +27,18 @@ class SlotService:
 
     def get_by_location(self, location_id: int) -> List[SlotResponseDTO]:
         slots = self.slot_repo.get_by_location(location_id)
-        return [SlotResponseDTO.from_orm(s) for s in slots]
+        return [SlotResponseDTO.model_validate(s) for s in slots]
 
     def get_available(self, location_id: int) -> List[SlotResponseDTO]:
         slots = self.slot_repo.get_available_by_location(location_id)
-        return [SlotResponseDTO.from_orm(s) for s in slots]
+        return [SlotResponseDTO.model_validate(s) for s in slots]
 
     def create(self, data: SlotCreateDTO) -> SlotResponseDTO:
         location = self.location_repo.get_by_id(data.location_id)
         if not location:
             raise HTTPException(status_code=404, detail=_ERR_LOCATION_NOT_FOUND)
         slot = self.slot_repo.create(data.location_id, data.start_time, data.end_time)
-        return SlotResponseDTO.from_orm(slot)
+        return SlotResponseDTO.model_validate(slot)
 
     def delete(self, slot_id: int) -> None:
         slot = self.slot_repo.get_by_id(slot_id)
@@ -55,7 +55,7 @@ class SlotService:
         if slot.status == SlotStatus.BOOKED:
             raise HTTPException(status_code=400, detail="Не можна змінити статус заброньованого слоту")
         updated = self.slot_repo.update_status(slot, status)
-        return SlotResponseDTO.from_orm(updated)
+        return SlotResponseDTO.model_validate(updated)
 
 
 class BookingService:
@@ -105,15 +105,15 @@ class BookingService:
         )
         self.slot_repo.update_status(slot, SlotStatus.BOOKED)
         self._notifier.notify_booking_created(booking.id, user_id, data.slot_id, total_price)
-        return BookingResponseDTO.from_orm(booking)
+        return BookingResponseDTO.model_validate(booking)
 
     def get_user_bookings(self, user_id: int) -> List[BookingResponseDTO]:
         bookings = self.booking_repo.get_by_user(user_id)
-        return [BookingResponseDTO.from_orm(b) for b in bookings]
+        return [BookingResponseDTO.model_validate(b) for b in bookings]
 
     def get_all_bookings(self) -> List[BookingResponseDTO]:
         bookings = self.booking_repo.get_all()
-        return [BookingResponseDTO.from_orm(b) for b in bookings]
+        return [BookingResponseDTO.model_validate(b) for b in bookings]
 
     def get_all_bookings_admin(self) -> List[BookingAdminResponseDTO]:
         """Get all bookings with location and user details for admin panel"""
@@ -215,11 +215,11 @@ class BookingService:
         updated = self.booking_repo.update_status(booking, BookingStatus.CANCELLED)
         self.slot_repo.update_status(booking.slot, SlotStatus.AVAILABLE)
         self._notifier.notify_booking_cancelled(booking_id, user_id)
-        return BookingResponseDTO.from_orm(updated)
+        return BookingResponseDTO.model_validate(updated)
 
     def update_status(self, booking_id: int, status: BookingStatus) -> BookingResponseDTO:
         booking = self.booking_repo.get_by_id(booking_id)
         if not booking:
             raise HTTPException(status_code=404, detail=_ERR_BOOKING_NOT_FOUND)
         updated = self.booking_repo.update_status(booking, status)
-        return BookingResponseDTO.from_orm(updated)
+        return BookingResponseDTO.model_validate(updated)

@@ -20,24 +20,24 @@ class LocationService:
 
     def get_all(self, category: Optional[LocationCategory] = None, active_only: bool = True) -> List[LocationResponseDTO]:  # noqa: E501
         locations = self.repo.get_all(category=category, active_only=active_only)
-        return [LocationResponseDTO.from_orm(loc) for loc in locations]
+        return [LocationResponseDTO.model_validate(loc) for loc in locations]
 
     def get_by_id(self, location_id: int) -> LocationResponseDTO:
         location = self.repo.get_by_id(location_id)
         if not location:
             raise HTTPException(status_code=404, detail=_LOCATION_NOT_FOUND)
-        return LocationResponseDTO.from_orm(location)
+        return LocationResponseDTO.model_validate(location)
 
     def create(self, data: LocationCreateDTO) -> LocationResponseDTO:
         location = self.repo.create(**data.dict())
-        return LocationResponseDTO.from_orm(location)
+        return LocationResponseDTO.model_validate(location)
 
     def update(self, location_id: int, data: LocationUpdateDTO) -> LocationResponseDTO:
         location = self.repo.get_by_id(location_id)
         if not location:
             raise HTTPException(status_code=404, detail=_LOCATION_NOT_FOUND)
         updated = self.repo.update(location, **data.dict(exclude_none=True))
-        return LocationResponseDTO.from_orm(updated)
+        return LocationResponseDTO.model_validate(updated)
 
     def delete(self, location_id: int) -> None:
         location = self.repo.get_by_id(location_id)

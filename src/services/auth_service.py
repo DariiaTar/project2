@@ -50,7 +50,7 @@ class AuthService:
             phone=data.phone,
         )
         token = self.create_access_token(user.id, user.role)
-        return TokenDTO(access_token=token, user=UserResponseDTO.from_orm(user))
+        return TokenDTO(access_token=token, user=UserResponseDTO.model_validate(user))
 
     def login(self, data: UserLoginDTO) -> TokenDTO:
         user = self.user_repo.get_by_email(data.email)
@@ -65,4 +65,4 @@ class AuthService:
                 detail="Акаунт заблоковано",
             )
         token = self.create_access_token(user.id, user.role)
-        return TokenDTO(access_token=token, user=UserResponseDTO.from_orm(user))
+        return TokenDTO(access_token=token, user=UserResponseDTO.model_validate(user))
