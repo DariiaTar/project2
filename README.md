@@ -284,29 +284,69 @@ ci: додати кешування pip у GitHub Actions
 
 ## CI/CD Pipeline
 
-GitHub Actions запускається автоматично при кожному push:
+Пайплайн описаний у `.github/workflows/ci.yml` і запускається автоматично при кожному `push` у будь-яку гілку та при `pull_request` у `main`.
+
+### Тригери
+
+```yaml
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+```
+
+### Jobs та порядок виконання
 
 ```
-push to any branch
+push / pull_request
     │
-    ├─→ Unit Tests (з coverage)
-    ├─→ Integration Tests (PostgreSQL service)
-    ├─→ Lint (flake8)
-    └─→ Frontend Build
-            │
-            └─→ (тільки main) Docker Build
-                        │
-                        └─→ (розкоментувати) Deploy to Production
+    ├─→ [1] Unit Tests (Backend)
+    │         pytest tests/unit/ + coverage
+    │         Артефакти: coverage.xml, htmlcov/, junit.xml, reports.zip
+    │
+    ├─→ [2] Integration Tests (Backend)
+    │         pytest tests/integration/ + PostgreSQL service container
+    │         Артефакт: junit-integration.xml
+    │
+    ├─→ [3] Lint — flake8 src/ tests/
+    │
+    ├─→ [4] SonarCloud Analysis
+    │         (після Unit Tests) → надсилає coverage.xml і junit.xml
+    │
+    ├─→ [5] Frontend Build
+    │         npm ci + npm run build
+    │         Артефакт: frontend/build/
+    │
+    └─→ [6] Docker Build (тільки push у main)
+              (після [1][2][3][5]) → збирає backend і frontend образи
 ```
 
-**Секрети для CI/CD** (додати у GitHub → Settings → Secrets):
+### Артефакти (завантажуються з GitHub Actions)
+
+| Артефакт | Вміст | Зберігається |
+|----------|-------|-------------|
+| `coverage-xml` | `coverage.xml` для SonarCloud | 7 днів |
+| `coverage-html` | HTML звіт покриття (`htmlcov/`) | 7 днів |
+| `junit-report` | `junit.xml` — результати юніт тестів | 7 днів |
+| `junit-integration-report` | Результати інтеграційних тестів | 7 днів |
+| `all-reports` | ZIP з усіма звітами | 7 днів |
+| `frontend-build` | Зібраний React (`build/`) | 3 дні |
+
+### Branch Protection
+
+Гілка `main` захищена ruleset — merge заблоковано якщо не пройшли:
+- `Unit Tests (Backend)`
+- `Integration Tests (Backend)`
+- `Code Style (flake8)`
+- `Frontend Build`
+
+### Секрети (GitHub → Settings → Secrets)
 
 | Secret | Призначення |
 |--------|-------------|
+| `SONAR_TOKEN` | Токен для SonarCloud аналізу |
 | `SECRET_KEY` | JWT підпис (продакшн) |
-| `DEPLOY_HOST` | IP/hostname продакшн-сервера |
-| `DEPLOY_USER` | SSH-логін |
-| `DEPLOY_SSH_KEY` | Приватний SSH-ключ для деплою |
 
 ---
 
@@ -479,15 +519,37 @@ sport-booking/
 
 ## AI конфігурація
 
-Проєкт налаштований для роботи з AI-асистентами:
+Проєкт адаптований для роботи з AI-асистентами (Cursor, Claude Code) у режимі автономних агентів. Кожен AI-інструмент отримує чіткий контекст архітектури, обмеження та готові команди — щоб генерований код завжди відповідав архітектурним рішенням проєкту.
 
-| Файл | Інструмент | Призначення |
-|------|-----------|-------------|
-| `CLAUDE.md` | Claude Code | Правила архітектури, автозавантажуються в кожну сесію |
-| `.cursorrules` | Cursor | Глобальні обмеження — SOLID, заборони, шари |
-| `.cursor/rules/architecture.md` | Cursor | Контекст архітектури при роботі з `src/` |
-| `.cursor/rules/testing_strategy.md` | Cursor | Конвенції тестів при роботі з `tests/` |
-| `.claude/commands/create-unit-tests.md` | Claude Code | `/create-unit-tests <ClassName>` |
-| `.claude/commands/add-service.md` | Claude Code | `/add-service <ServiceName>` |
-| `.claude/commands/add-repository.md` | Claude Code | `/add-repository <EntityName>` |
-| `.claude/commands/add-pricing-strategy.md` | Claude Code | `/add-pricing-strategy <StrategyName>` |
+### Глобальні правила
+
+**`.cursorrules`** — завантажується в кожен чат Cursor автоматично. Містить жорсткі заборони:
+- Не генерувати код без інтерфейсів (всі репозиторії реалізують ABC)
+- TDD — спочатку тест, потім реалізація
+- Заборона raw SQL — тільки через Repository layer
+- Заборона зовнішніх API та реальних БД у тестах
+- Всі `HTTPException` повідомлення — українською
+- Покриття тестами ≥ 70%
+
+**`CLAUDE.md`** — аналог `.cursorrules` для Claude Code. Автоматично завантажується на початку кожної сесії Claude Code CLI.
+
+### Контекстні файли (Cursor Skills)
+
+| Файл | Коли активується | Що дає AI |
+|------|-----------------|-----------|
+| `.cursor/rules/architecture.md` | При роботі з `src/` | Шари, GoF патерни, DI, заборонені імпорти |
+| `.cursor/rules/testing_strategy.md` | При роботі з `tests/` | Команди pytest, мок-патерни, coverage цілі |
+
+Файли не завантажуються постійно — Cursor активує їх лише коли відкрито відповідні файли, щоб не перевантажувати контекст.
+
+### Slash-команди (Claude Code)
+
+Команди викликаються через `/назва` в Claude Code CLI. Кожна команда — окремий файл з покроковими інструкціями:
+
+| Команда | Файл | Що виконує |
+|---------|------|-----------|
+| `/create-unit-tests BookingService` | `.claude/commands/create-unit-tests.md` | Генерує повний тест-файл: happy path + error + edge cases |
+| `/add-service ReviewService` | `.claude/commands/add-service.md` | Скаффолдить сервіс + контролер + FastAPI dependency |
+| `/add-repository Review` | `.claude/commands/add-repository.md` | Створює інтерфейс + SQL + InMemory реалізації |
+| `/add-pricing-strategy HolidayStrategy` | `.claude/commands/add-pricing-strategy.md` | Додає нову стратегію ціноутворення з тестами |
+
