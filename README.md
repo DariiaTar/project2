@@ -16,6 +16,14 @@
 
 ---
 
+## Демо
+https://vimeo.com/1195271587?share=copy&fl=sv&fe=ci
+
+
+
+
+---
+
 ## Зміст
 
 - [Якість коду](#якість-коду-sonarcloud)
