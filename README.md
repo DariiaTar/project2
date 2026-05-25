@@ -18,6 +18,7 @@
 
 ## Зміст
 
+- [Демо](#демо)
 - [Якість коду](#якість-коду-sonarcloud)
 - [Архітектура](#архітектура)
 - [Design Patterns](#design-patterns)
@@ -46,6 +47,8 @@
 
 Повний звіт: [SonarCloud Dashboard](https://sonarcloud.io/summary/new_code?id=DariiaTar_project2)
 
+![SonarCloud Summary](docs/sonarcloud-summary.png)
+
 ---
 
 ## Архітектура
@@ -70,6 +73,12 @@ Layered (шарова) архітектура зі строгим напрямк
 - **L** — InMemory репозиторії є drop-in заміною SQL
 - **I** — ABC інтерфейси дрібні й сфокусовані
 - **D** — сервіси залежать від `IRepository`, не від конкретних класів
+
+## Демо
+
+![Demo](docs/demo.gif)
+
+---
 
 ## Діаграми
 
